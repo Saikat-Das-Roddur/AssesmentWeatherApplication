@@ -26,8 +26,9 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
 import com.app.assesmentweatherapplication.Adapters.HourlyWeatherAdapter;
+import com.app.assesmentweatherapplication.Adapters.SevenDaysWeatherAdapter;
 import com.app.assesmentweatherapplication.Config;
-import com.app.assesmentweatherapplication.Model.DailyWeather;
+import com.app.assesmentweatherapplication.Model.SevenDaysWeather;
 import com.app.assesmentweatherapplication.Model.HourlyWeather;
 import com.app.assesmentweatherapplication.Model.PreviousWeather;
 import com.app.assesmentweatherapplication.R;
@@ -50,12 +51,13 @@ public class MainActivity extends AppCompatActivity {
             textViewCountry,textViewDescription,textViewSunset,
             textViewSunrise,textViewHumidity,textViewUvi, textViewWindSpeed;
     ImageView imageViewWeather;
-    RecyclerView recyclerViewHourly,recyclerViewDaily, recyclerViewPrevious;
+    RecyclerView recyclerViewHourly,recyclerViewSevenDays, recyclerViewPrevious;
     HourlyWeatherAdapter hourlyWeatherAdapter;
-    RecyclerView.LayoutManager layoutManagerHourly, layoutManagerDaily;
+    SevenDaysWeatherAdapter sevenDaysWeatherAdapter;
+    RecyclerView.LayoutManager layoutManagerHourly, layoutManagerSevenDays;
     boolean currentCity = false;
     ArrayList<HourlyWeather> hourlyWeathers = new ArrayList<>();
-    ArrayList<DailyWeather> dailyWeathers = new ArrayList<>();
+    ArrayList<SevenDaysWeather> sevenDaysWeathers = new ArrayList<>();
     ArrayList<PreviousWeather> previousWeathers = new ArrayList<>();
     //LocationManager locationManager;
     LocationListener locationListener;
@@ -69,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         AndroidNetworking.initialize(this);
         recyclerViewHourly = findViewById(R.id.hourlyRecyclerView);
+        recyclerViewSevenDays = findViewById(R.id.sevenDaysRecyclerView);
         textViewCity = findViewById(R.id.cityTv);
         textViewCountry = findViewById(R.id.countryTv);
         textViewDescription = findViewById(R.id.descTv);
@@ -143,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
                     JSONArray jsonArrayHourly = response.getJSONArray("hourly");
                     JSONArray jsonArrayDaily = response.getJSONArray("daily");
-
+                    hourlyWeathers.clear();
                     for (int i = 0; i < jsonArrayHourly.length(); i++) {
                         String date = unixTimeConverter(jsonArrayHourly.getJSONObject(i).getLong("dt"));
                         String temperature = new DecimalFormat("#0.00").format(jsonArrayHourly.getJSONObject(i).getDouble("temp")-273.15)+"°C";
@@ -152,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
 
                         hourlyWeathers.add(new HourlyWeather(date,image,temperature,description));
                     }
+                    sevenDaysWeathers.clear();
                     for (int i = 0; i < jsonArrayDaily.length(); i++) {
                         String date = unixDateConverter(jsonArrayDaily.getJSONObject(i).getLong("dt"));
                         String minTemperature = new DecimalFormat("#0.00").format(jsonArrayDaily.getJSONObject(i).getJSONObject("temp").getDouble("min")-273.15);
@@ -159,10 +163,10 @@ public class MainActivity extends AppCompatActivity {
                         String image = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("icon")+".png";
                         String description = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("description");
 
-                        dailyWeathers.add(new DailyWeather(date,minTemperature,maxTemperature,image));
+                        sevenDaysWeathers.add(new SevenDaysWeather(date,minTemperature,maxTemperature,image));
                     }
                     setHourlyAdapter();
-                    setDailyAdapter();
+                    setSevenDaysAdapter();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -176,8 +180,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setDailyAdapter() {
-
+    private void setSevenDaysAdapter() {
+        sevenDaysWeatherAdapter = new SevenDaysWeatherAdapter(sevenDaysWeathers,this);
+        recyclerViewSevenDays.setAdapter(sevenDaysWeatherAdapter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerViewSevenDays.setLayoutManager(layoutManager);
     }
 
     private void setHourlyAdapter() {
@@ -202,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
                     timezone = response.getLong("timezone");
                     unixDate = response.getLong("dt");
                     textViewTime.setText(new SimpleDateFormat("h:mm a").format(new Date()));
-                    textViewDate.setText(new SimpleDateFormat("EEE, d MMM").format(new Date()));
+                    textViewDate.setText(new SimpleDateFormat("EEE, d MMM").format(new Date()).toUpperCase());
                     //Toast.makeText(MainActivity.this,response.getJSONArray("weather").getJSONObject(0).getString("icon") , Toast.LENGTH_SHORT).show();
                     Picasso.get().load(Config.WEATHER_IMAGE_URL+response.getJSONArray("weather").getJSONObject(0).getString("icon")+".png").into(imageViewWeather);
                     //imageViewWeather.setImageResource(getResources().getIdentifier(response.getJSONArray("weather").getJSONObject(0).getString("icon"),"drawable",getPackageName()));
@@ -247,17 +254,17 @@ public class MainActivity extends AppCompatActivity {
         return formattedDate;
     }
 
-
-    public void statusCheck() {
-
-
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            buildAlertMessageNoGps();
-        }else{
-            getCurrentLocation();
-        }
-
-    }
+//
+//    public void statusCheck() {
+//
+//
+//        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//            buildAlertMessageNoGps();
+//        }else{
+//            getCurrentLocation();
+//        }
+//
+//    }
 
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);

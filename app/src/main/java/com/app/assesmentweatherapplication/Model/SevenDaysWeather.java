@@ -3,13 +3,13 @@ package com.app.assesmentweatherapplication.Model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class DailyWeather implements Parcelable {
+public class SevenDaysWeather implements Parcelable {
     String date;
     String tempMin;
     String tempMax;
     String image;
 
-    public DailyWeather(String date, String tempMin, String tempMax, String image) {
+    public SevenDaysWeather(String date, String tempMin, String tempMax, String image) {
         this.date = date;
         this.tempMin = tempMin;
         this.tempMax = tempMax;
@@ -48,7 +48,7 @@ public class DailyWeather implements Parcelable {
         this.image = image;
     }
 
-    protected DailyWeather(Parcel in) {
+    protected SevenDaysWeather(Parcel in) {
         date = in.readString();
         tempMin = in.readString();
         tempMax = in.readString();
@@ -69,15 +69,15 @@ public class DailyWeather implements Parcelable {
     }
 
     @SuppressWarnings("unused")
-    public static final Parcelable.Creator<DailyWeather> CREATOR = new Parcelable.Creator<DailyWeather>() {
+    public static final Parcelable.Creator<SevenDaysWeather> CREATOR = new Parcelable.Creator<SevenDaysWeather>() {
         @Override
-        public DailyWeather createFromParcel(Parcel in) {
-            return new DailyWeather(in);
+        public SevenDaysWeather createFromParcel(Parcel in) {
+            return new SevenDaysWeather(in);
         }
 
         @Override
-        public DailyWeather[] newArray(int size) {
-            return new DailyWeather[size];
+        public SevenDaysWeather[] newArray(int size) {
+            return new SevenDaysWeather[size];
         }
     };
 }

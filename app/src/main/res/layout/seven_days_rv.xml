@@ -1,40 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_margin="4dp"
+    android:layout_margin="8dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <TextView
-            android:text="Tue, 17 Nov"
-            android:id="@+id/dateTv"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textSize="18sp"
-            android:layout_gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
         <ImageView
             android:layout_weight="1"
             android:id="@+id/weatherIv"
-            android:layout_margin="16dp"
+            android:layout_margin="8dp"
             android:layout_centerVertical="true"
             android:layout_width="match_parent"
-            android:layout_height="100dp"/>
-
-        <TextView
-            android:layout_gravity="center"
+            android:layout_height="72dp"/>
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_weight="1"
-            android:text="30/25"
-            android:id="@+id/temperatureTv"
             android:gravity="center"
-            android:textSize="18sp"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="Tue, 17 Nov"
+                android:id="@+id/dateTv"
+
+                android:textSize="18sp"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:text="30°/25°"
+                android:id="@+id/temperatureTv"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="Tue, 17 Nov"
+                android:id="@+id/dateTv"
+
+                android:textSize="18sp"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:text="30°/25°"
+                android:id="@+id/temperatureTv"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+         </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -355,12 +355,17 @@
                         android:layout_height="wrap_content"/>
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
-            <androidx.recyclerview.widget.RecyclerView
-                android:visibility="visible"
-                android:id="@+id/dailyRecyclerView"
+            <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-            </androidx.recyclerview.widget.RecyclerView>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:visibility="visible"
+                    android:id="@+id/sevenDaysRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                </androidx.recyclerview.widget.RecyclerView>
+            </ScrollView>
+
             <androidx.cardview.widget.CardView
                 android:layout_margin="4dp"
                 android:id="@+id/fiveDaysCard"
