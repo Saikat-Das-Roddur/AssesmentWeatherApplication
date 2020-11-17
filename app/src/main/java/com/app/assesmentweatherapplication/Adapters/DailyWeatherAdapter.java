@@ -6,15 +6,15 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class CurrentWeatherAdapter extends RecyclerView.Adapter<CurrentWeatherAdapter.Holder> {
+public class DailyWeatherAdapter extends RecyclerView.Adapter<DailyWeatherAdapter.Holder> {
     @NonNull
     @Override
-    public CurrentWeatherAdapter.Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public DailyWeatherAdapter.Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return null;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CurrentWeatherAdapter.Holder holder, int position) {
+    public void onBindViewHolder(@NonNull DailyWeatherAdapter.Holder holder, int position) {
 
     }
 

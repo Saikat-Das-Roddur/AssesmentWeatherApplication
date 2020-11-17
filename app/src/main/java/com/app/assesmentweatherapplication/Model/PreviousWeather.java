@@ -1,4 +1,4 @@
 package com.app.assesmentweatherapplication.Model;
 
-public class Weather {
+public class PreviousWeather {
 }

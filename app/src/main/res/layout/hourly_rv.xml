@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="10dp"
+    android:layout_margin="4dp"
+    android:layout_width="150dp"
+    android:layout_height="150dp">
+<LinearLayout
+    android:layout_gravity="center"
+    android:padding="16dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/dateTv"
+        android:layout_gravity="center"
+        android:text="Tue,17 Nov"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <ImageView
+        android:layout_margin="4dp"
+        android:id="@+id/weatherIv"
+        android:layout_gravity="center"
+        android:layout_width="48dp"
+        android:layout_height="48dp">
+    </ImageView>
+    <TextView
+        android:id="@+id/temperatureTv"
+        android:layout_gravity="center"
+        android:text="23.14°C"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/descTv"
+        android:layout_gravity="center"
+        android:text="Clear Sky"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+</androidx.cardview.widget.CardView>
