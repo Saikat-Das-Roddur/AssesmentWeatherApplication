@@ -3,11 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="10dp"
     android:layout_margin="4dp"
-    android:layout_width="150dp"
+    app:cardBackgroundColor="#81C784"
+    android:layout_width="120dp"
     android:layout_height="150dp">
 <LinearLayout
     android:layout_gravity="center"
-    android:padding="16dp"
+    android:padding="4dp"
+    android:layout_margin="4dp"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -15,9 +17,11 @@
         android:id="@+id/dateTv"
         android:layout_gravity="center"
         android:text="Tue,17 Nov"
+        android:textColor="@color/white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <ImageView
+        app:tint="@color/white"
         android:layout_margin="4dp"
         android:id="@+id/weatherIv"
         android:layout_gravity="center"
@@ -28,10 +32,12 @@
         android:id="@+id/temperatureTv"
         android:layout_gravity="center"
         android:text="23.14°C"
+        android:textColor="@color/white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <TextView
         android:id="@+id/descTv"
+        android:textColor="@color/white"
         android:layout_gravity="center"
         android:text="Clear Sky"
         android:layout_width="wrap_content"

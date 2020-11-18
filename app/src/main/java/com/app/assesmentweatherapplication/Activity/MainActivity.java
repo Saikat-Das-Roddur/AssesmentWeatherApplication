@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,11 +14,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +30,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
 import com.app.assesmentweatherapplication.Adapters.HourlyWeatherAdapter;
+import com.app.assesmentweatherapplication.Adapters.PreviousWeatherAdapter;
 import com.app.assesmentweatherapplication.Adapters.SevenDaysWeatherAdapter;
 import com.app.assesmentweatherapplication.Config;
 import com.app.assesmentweatherapplication.Model.SevenDaysWeather;
@@ -43,27 +48,35 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
     TextView textViewCity, textViewToday, textViewDate,
             textViewTemperature, textViewTime, textViewFeels,
-            textViewCountry,textViewDescription,textViewSunset,
-            textViewSunrise,textViewHumidity,textViewUvi, textViewWindSpeed;
-    ImageView imageViewWeather;
-    RecyclerView recyclerViewHourly,recyclerViewSevenDays, recyclerViewPrevious;
+            textViewCountry, textViewDescription, textViewSunset,
+            textViewSunrise, textViewHumidity, textViewUvi, textViewWindSpeed;
+    ImageView imageViewWeather, imageViewSevenDays, imageViewFiveDays;
+    RecyclerView recyclerViewHourly, recyclerViewSevenDays, recyclerViewPrevious;
+    CardView cardViewSevenDays,cardViewFiveDays;
     HourlyWeatherAdapter hourlyWeatherAdapter;
     SevenDaysWeatherAdapter sevenDaysWeatherAdapter;
-    RecyclerView.LayoutManager layoutManagerHourly, layoutManagerSevenDays;
-    boolean currentCity = false;
+    PreviousWeatherAdapter previousWeatherAdapter;
+   // RecyclerView.LayoutManager layoutManagerHourly, layoutManagerSevenDays, layoutManagerPreviousWeather;
     ArrayList<HourlyWeather> hourlyWeathers = new ArrayList<>();
     ArrayList<SevenDaysWeather> sevenDaysWeathers = new ArrayList<>();
     ArrayList<PreviousWeather> previousWeathers = new ArrayList<>();
+    ArrayList<Long> previousTime = new ArrayList<>();
+    Set<PreviousWeather> set;
+//        previousWeathers.clear();
+//        previousWeathers.addAll(set);
     //LocationManager locationManager;
     LocationListener locationListener;
-    String TAG = getClass().getSimpleName(), latitude="", longitude="";
-    long timezone=0,unixDate=0;
     LocationManager manager;
+    String TAG = getClass().getSimpleName(), latitude = "", longitude = "";
+    long timezone = 0, unixDate = 0,time=0L;
+    boolean isOpenSevenDays = true,isOpenFiveDays=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         AndroidNetworking.initialize(this);
         recyclerViewHourly = findViewById(R.id.hourlyRecyclerView);
         recyclerViewSevenDays = findViewById(R.id.sevenDaysRecyclerView);
+        recyclerViewPrevious = findViewById(R.id.previouslyRecyclerView);
         textViewCity = findViewById(R.id.cityTv);
         textViewCountry = findViewById(R.id.countryTv);
         textViewDescription = findViewById(R.id.descTv);
@@ -81,18 +95,60 @@ public class MainActivity extends AppCompatActivity {
         textViewTime = findViewById(R.id.timeTv);
         textViewFeels = findViewById(R.id.feelsTv);
         imageViewWeather = findViewById(R.id.weatherIv);
+        imageViewSevenDays = findViewById(R.id.openSevenDaysIv);
+        imageViewFiveDays = findViewById(R.id.fiveDaysIv);
         textViewSunset = findViewById(R.id.sunsetTv);
         textViewSunrise = findViewById(R.id.sunriseTv);
         textViewUvi = findViewById(R.id.uviTv);
         textViewHumidity = findViewById(R.id.humidityTv);
         textViewWindSpeed = findViewById(R.id.windTv);
+        cardViewSevenDays = findViewById(R.id.sevenDaysCard);
+        cardViewFiveDays = findViewById(R.id.fiveDaysCard);
+        previousTime.clear();
+        long date = new Date().getTime()/1000L;
+        for (int i = 0; i <5 ; i++) {
+            time=date-i*+24 * 60 * 60;
+            previousTime.add(time);
+        }
+
+
+        cardViewSevenDays.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isOpenSevenDays) {
+                    recyclerViewSevenDays.setVisibility(View.VISIBLE);
+                    imageViewSevenDays.setImageResource(R.drawable.ic_minus_thick_grey600_24dp);
+                    imageViewSevenDays.setColorFilter(getResources().getColor(R.color.colorYellow));
+                    isOpenSevenDays = false;
+                } else {
+                    recyclerViewSevenDays.setVisibility(View.GONE);
+                    imageViewSevenDays.setImageResource(R.drawable.ic_plus_thick_grey600_24dp);
+                    imageViewSevenDays.setColorFilter(getResources().getColor(R.color.colorPrimary));
+                    isOpenSevenDays = true;
+                }
+            }
+        });
+        cardViewFiveDays.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isOpenFiveDays) {
+                    recyclerViewPrevious.setVisibility(View.VISIBLE);
+                    imageViewFiveDays.setImageResource(R.drawable.ic_minus_thick_grey600_24dp);
+                    imageViewFiveDays.setColorFilter(getResources().getColor(R.color.colorYellow));
+                    isOpenFiveDays = false;
+                } else {
+                    recyclerViewPrevious.setVisibility(View.GONE);
+                    imageViewFiveDays.setImageResource(R.drawable.ic_plus_thick_grey600_24dp);
+                    imageViewFiveDays.setColorFilter(getResources().getColor(R.color.colorPrimary));
+                    isOpenFiveDays = true;
+                }
+            }
+        });
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 //        textViewTime.setText(new SimpleDateFormat("h:mm a").format(new Date()));
 //        textViewDate.setText(new SimpleDateFormat("EEE, d MMM").format(new Date()));
-       // statusCheck();
-           getCurrentLocation();
-
-
+        // statusCheck();
+        getCurrentLocation();
 
 
     }
@@ -100,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
     private void getCurrentLocation() {
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessageNoGps();
-        }else {
+        } else {
             //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             locationListener = new LocationListener() {
                 @Override
@@ -109,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
                     longitude = String.valueOf(location.getLongitude());
                     getCurrentLocationWeather(latitude, longitude);
                     getHourlySevenDaysWeather(latitude, longitude);
+                    getPreviousHistoricalWeather();
                 }
             };
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -130,17 +187,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void getPreviousHistoricalWeather() {
+
+
+        previousWeathers.clear();
+        Toast.makeText(this, previousWeathers.size()+"", Toast.LENGTH_SHORT).show();
+        for (int i = 0; i < previousTime.size(); i++) {
+            
+            ServerCalling.getHistoricalWeather(latitude, longitude, String.valueOf(previousTime.get(i)), new JSONObjectRequestListener() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        String date = unixDateConverter(response.getJSONObject("current").getLong("dt"));
+                        String temperature = new DecimalFormat("#.#").format(response.getJSONObject("current").getDouble("temp")-273.15)+"°C";
+                        String image = response.getJSONObject("current").getJSONArray("weather").getJSONObject(0).getString("icon")+".png";
+                        String description = response.getJSONObject("current").getJSONArray("weather").getJSONObject(0).getString("description");
+                        previousWeathers.add(new PreviousWeather(date,image,temperature,description));
+                        setPreviousWeatherAdapter();
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                   // Toast.makeText(MainActivity.this, previousWeathers.size()+"", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(ANError anError) {
+
+                }
+            });
+
+      }
+
+
+    }
+
+
+
     private void getHourlySevenDaysWeather(String latitude, String longitude) {
         ServerCalling.getHourlySevenDaysWeather(latitude, longitude, new JSONObjectRequestListener() {
             @Override
             public void onResponse(JSONObject response) {
 
 
-
                 try {
                     textViewSunrise.setText(unixTimeConverter(response.getJSONObject("current").getLong("sunrise")));
                     textViewSunset.setText(unixTimeConverter(response.getJSONObject("current").getLong("sunset")));
-                    textViewHumidity.setText(response.getJSONObject("current").getString("humidity")+"%");
+                    textViewHumidity.setText(response.getJSONObject("current").getString("humidity") + "%");
                     textViewUvi.setText(response.getJSONObject("current").getString("uvi"));
                     textViewWindSpeed.setText(response.getJSONObject("current").getString("wind_speed"));
 
@@ -149,21 +243,21 @@ public class MainActivity extends AppCompatActivity {
                     hourlyWeathers.clear();
                     for (int i = 0; i < jsonArrayHourly.length(); i++) {
                         String date = unixTimeConverter(jsonArrayHourly.getJSONObject(i).getLong("dt"));
-                        String temperature = new DecimalFormat("#0.00").format(jsonArrayHourly.getJSONObject(i).getDouble("temp")-273.15)+"°C";
-                        String image = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("icon")+".png";
+                        String temperature = new DecimalFormat("#0.0").format(jsonArrayHourly.getJSONObject(i).getDouble("temp") - 273.15) + "°C";
+                        String image = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("icon") + ".png";
                         String description = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("description");
 
-                        hourlyWeathers.add(new HourlyWeather(date,image,temperature,description));
+                        hourlyWeathers.add(new HourlyWeather(date, image, temperature, description));
                     }
                     sevenDaysWeathers.clear();
                     for (int i = 0; i < jsonArrayDaily.length(); i++) {
                         String date = unixDateConverter(jsonArrayDaily.getJSONObject(i).getLong("dt"));
-                        String minTemperature = new DecimalFormat("#0.00").format(jsonArrayDaily.getJSONObject(i).getJSONObject("temp").getDouble("min")-273.15);
-                        String maxTemperature = new DecimalFormat("#0.00").format(jsonArrayDaily.getJSONObject(i).getJSONObject("temp").getDouble("max")-273.15);
-                        String image = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("icon")+".png";
+                        String minTemperature = new DecimalFormat("#0.0").format(jsonArrayDaily.getJSONObject(i).getJSONObject("temp").getDouble("min") - 273.15);
+                        String maxTemperature = new DecimalFormat("#0.0").format(jsonArrayDaily.getJSONObject(i).getJSONObject("temp").getDouble("max") - 273.15);
+                        String image = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("icon") + ".png";
                         String description = jsonArrayHourly.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("description");
 
-                        sevenDaysWeathers.add(new SevenDaysWeather(date,minTemperature,maxTemperature,image));
+                        sevenDaysWeathers.add(new SevenDaysWeather(date, minTemperature, maxTemperature, image));
                     }
                     setHourlyAdapter();
                     setSevenDaysAdapter();
@@ -180,17 +274,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setPreviousWeatherAdapter() {
+
+        previousWeatherAdapter = new PreviousWeatherAdapter(previousWeathers, this);
+        recyclerViewPrevious.setAdapter(previousWeatherAdapter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerViewPrevious.setLayoutManager(layoutManager);
+    }
+
     private void setSevenDaysAdapter() {
-        sevenDaysWeatherAdapter = new SevenDaysWeatherAdapter(sevenDaysWeathers,this);
+        sevenDaysWeatherAdapter = new SevenDaysWeatherAdapter(sevenDaysWeathers, this);
         recyclerViewSevenDays.setAdapter(sevenDaysWeatherAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerViewSevenDays.setLayoutManager(layoutManager);
     }
 
     private void setHourlyAdapter() {
-        hourlyWeatherAdapter = new HourlyWeatherAdapter(hourlyWeathers,this);
+        hourlyWeatherAdapter = new HourlyWeatherAdapter(hourlyWeathers, this);
         recyclerViewHourly.setAdapter(hourlyWeatherAdapter);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerViewHourly.setLayoutManager(layoutManager);
     }
 
@@ -199,22 +301,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    Log.d(TAG, "onResponse: "+response);
+                    Log.d(TAG, "onResponse: " + response);
                     //JSONArray jsonArray = response.getJSONArray("weather");
-                    textViewCity.setText(response.getString("name")+", "+response.getJSONObject("sys").getString("country"));
+                    textViewCity.setText(response.getString("name") + ", " + response.getJSONObject("sys").getString("country"));
                     //textViewCountry.setText(response.getJSONObject("sys").getString("country"));
                     textViewDescription.setText(response.getJSONArray("weather").getJSONObject(0).getString("description").toUpperCase());
-                    textViewTemperature.setText(( new DecimalFormat("#0.00").format(response.getJSONObject("main").getDouble("temp")-273.15))+"°C");
-                    textViewFeels.setText("Feels like "+(new DecimalFormat("#0.00").format(response.getJSONObject("main").getDouble("feels_like")-273.15))+"°C");
+                    textViewTemperature.setText((new DecimalFormat("#0.0").format(response.getJSONObject("main").getDouble("temp") - 273.15)) + "°C");
+                    textViewFeels.setText("Feels like " + (new DecimalFormat("#0.0").format(response.getJSONObject("main").getDouble("feels_like") - 273.15)) + "°C");
                     timezone = response.getLong("timezone");
                     unixDate = response.getLong("dt");
                     textViewTime.setText(new SimpleDateFormat("h:mm a").format(new Date()));
                     textViewDate.setText(new SimpleDateFormat("EEE, d MMM").format(new Date()).toUpperCase());
                     //Toast.makeText(MainActivity.this,response.getJSONArray("weather").getJSONObject(0).getString("icon") , Toast.LENGTH_SHORT).show();
-                    Picasso.get().load(Config.WEATHER_IMAGE_URL+response.getJSONArray("weather").getJSONObject(0).getString("icon")+".png").into(imageViewWeather);
-                    //imageViewWeather.setImageResource(getResources().getIdentifier(response.getJSONArray("weather").getJSONObject(0).getString("icon"),"drawable",getPackageName()));
-                    //Toast.makeText(MainActivity.this, textViewCity.getText(), Toast.LENGTH_SHORT).show();
-                } catch (JSONException e) {
+                    Picasso.get().load(Config.WEATHER_IMAGE_URL + response.getJSONArray("weather").getJSONObject(0).getString("icon") + ".png").into(imageViewWeather);
+
+                      } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -226,45 +327,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private String unixDateConverter(long unixDate){
+    private String unixDateConverter(long unixDate) {
         SimpleDateFormat simpleDateFormatDate;
-       // long unixSeconds = 1372339860;
-// convert seconds to milliseconds
-        Date date = new java.util.Date(unixDate*1000L);
-// the format of your date
+        Date date = new java.util.Date(unixDate * 1000L);
         simpleDateFormatDate = new SimpleDateFormat("EEE, d MMM");
-// give a timezone reference for formatting (see comment at the bottom)
         simpleDateFormatDate.setTimeZone(TimeZone.getDefault());//java.util.TimeZone.getTimeZone("GMT-4")
         String formattedDate = simpleDateFormatDate.format(date);
         System.out.println(formattedDate);
         return formattedDate;
     }
 
-    private String unixTimeConverter(long unixTime){
+    private String unixTimeConverter(long unixTime) {
         SimpleDateFormat simpleDateFormatTime;
-        // long unixSeconds = 1372339860;
-// convert seconds to milliseconds
-        Date date = new java.util.Date(unixTime*1000L);
-// the format of your date
+        Date date = new java.util.Date(unixTime * 1000L);
         simpleDateFormatTime = new SimpleDateFormat("h:mm a");
-// give a timezone reference for formatting (see comment at the bottom)
         simpleDateFormatTime.setTimeZone(TimeZone.getDefault());//java.util.TimeZone.getTimeZone("GMT-4")
         String formattedDate = simpleDateFormatTime.format(date);
         System.out.println(formattedDate);
         return formattedDate;
     }
-
-//
-//    public void statusCheck() {
-//
-//
-//        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-//            buildAlertMessageNoGps();
-//        }else{
-//            getCurrentLocation();
-//        }
-//
-//    }
 
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -287,20 +368,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-            getCurrentLocation();
-
-
+        getCurrentLocation();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-            getCurrentLocation();
-
-
+        getCurrentLocation();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
