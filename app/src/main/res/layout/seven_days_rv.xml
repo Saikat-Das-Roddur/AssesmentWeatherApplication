@@ -5,7 +5,7 @@
     android:layout_marginRight="8dp"
     android:layout_marginLeft="8dp"
     android:layout_marginBottom="4dp"
-    app:cardBackgroundColor="#81C784"
+    app:cardBackgroundColor="#26A69A"
     app:cardCornerRadius="4dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">

@@ -18,6 +18,8 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewCity, textViewToday, textViewDate,
             textViewTemperature, textViewTime, textViewFeels,
             textViewCountry, textViewDescription, textViewSunset,
-            textViewSunrise, textViewHumidity, textViewUvi, textViewWindSpeed;
+            textViewSunrise, textViewHumidity, textViewUvi, textViewWindSpeed, textViewDewPoint ;
     ImageView imageViewWeather, imageViewSevenDays, imageViewFiveDays;
     RecyclerView recyclerViewHourly, recyclerViewSevenDays, recyclerViewPrevious;
     CardView cardViewSevenDays,cardViewFiveDays;
@@ -102,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         textViewUvi = findViewById(R.id.uviTv);
         textViewHumidity = findViewById(R.id.humidityTv);
         textViewWindSpeed = findViewById(R.id.windTv);
+        textViewDewPoint = findViewById(R.id.dewTv);
         cardViewSevenDays = findViewById(R.id.sevenDaysCard);
         cardViewFiveDays = findViewById(R.id.fiveDaysCard);
         previousTime.clear();
@@ -154,44 +157,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getCurrentLocation() {
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            buildAlertMessageNoGps();
-        } else {
-            //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            locationListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(@NonNull Location location) {
-                    latitude = String.valueOf(location.getLatitude());
-                    longitude = String.valueOf(location.getLongitude());
-                    getCurrentLocationWeather(latitude, longitude);
-                    getHourlySevenDaysWeather(latitude, longitude);
-                    getPreviousHistoricalWeather();
+
+        if (isOnline()){
+            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                buildAlertMessageNoGps();
+            } else {
+                //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                locationListener = new LocationListener() {
+                    @Override
+                    public void onLocationChanged(@NonNull Location location) {
+                        latitude = String.valueOf(location.getLatitude());
+                        longitude = String.valueOf(location.getLongitude());
+                        getCurrentLocationWeather(latitude, longitude);
+                        getHourlySevenDaysWeather(latitude, longitude);
+                        getPreviousHistoricalWeather();
+                    }
+                };
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+                    return;
                 }
-            };
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                ActivityCompat.requestPermissions(this, new String[]{
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION}, 123);
-                return;
+                manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                        5000, 1000
+                        , locationListener);
             }
-            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    5000, 1000
-                    , locationListener);
+        }else {
+            showAlertDialog();
         }
+
     }
 
     private void getPreviousHistoricalWeather() {
 
 
         previousWeathers.clear();
-        Toast.makeText(this, previousWeathers.size()+"", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, previousWeathers.size()+"", Toast.LENGTH_SHORT).show();
         for (int i = 0; i < previousTime.size(); i++) {
             
             ServerCalling.getHistoricalWeather(latitude, longitude, String.valueOf(previousTime.get(i)), new JSONObjectRequestListener() {
@@ -199,10 +208,17 @@ public class MainActivity extends AppCompatActivity {
                 public void onResponse(JSONObject response) {
                     try {
                         String date = unixDateConverter(response.getJSONObject("current").getLong("dt"));
+                        String sunrise = unixTimeConverter(response.getJSONObject("current").getLong("sunrise"));
+                        String sunset = unixTimeConverter(response.getJSONObject("current").getLong("sunset"));
+                        String humidity = response.getJSONObject("current").getString("humidity")+"%";
+                        String dewPoint = response.getJSONObject("current").getString("dew_point");
+                        String uvi = response.getJSONObject("current").getString("uvi");
+                        String wind = response.getJSONObject("current").getString("wind_speed")+" mph";
+                        JSONArray hourly = response.getJSONArray("hourly");
                         String temperature = new DecimalFormat("#.#").format(response.getJSONObject("current").getDouble("temp")-273.15)+"°C";
                         String image = response.getJSONObject("current").getJSONArray("weather").getJSONObject(0).getString("icon")+".png";
                         String description = response.getJSONObject("current").getJSONArray("weather").getJSONObject(0).getString("description");
-                        previousWeathers.add(new PreviousWeather(date,image,temperature,description));
+                        previousWeathers.add(new PreviousWeather(date,image,temperature,description,sunrise,sunset,humidity,dewPoint,uvi,wind,hourly));
                         setPreviousWeatherAdapter();
 
 
@@ -222,8 +238,35 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    public boolean isOnline() {
 
+        //Get the connectivity service from the device
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
 
+        //Return true if there is no connectivity issues with the internet
+        return info != null && info.isConnected();
+
+    }
+
+    private void showAlertDialog() {
+
+        //This dialog will be shown if the device is not connected with the online
+        new AlertDialog.Builder(this).setTitle("No Internet Connection")
+                .setMessage("You need to have Mobile Data or wifi to access this. Press ok to Exit")
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (isOnline()) {
+
+                            //If the device is online then it can populate data from the github
+                            getCurrentLocation();
+                        } else {
+                            finish();
+                        }
+                    }
+                }).show();
+    }
 
     private void getHourlySevenDaysWeather(String latitude, String longitude) {
         ServerCalling.getHourlySevenDaysWeather(latitude, longitude, new JSONObjectRequestListener() {
@@ -236,8 +279,8 @@ public class MainActivity extends AppCompatActivity {
                     textViewSunset.setText(unixTimeConverter(response.getJSONObject("current").getLong("sunset")));
                     textViewHumidity.setText(response.getJSONObject("current").getString("humidity") + "%");
                     textViewUvi.setText(response.getJSONObject("current").getString("uvi"));
-                    textViewWindSpeed.setText(response.getJSONObject("current").getString("wind_speed"));
-
+                    textViewWindSpeed.setText(response.getJSONObject("current").getString("wind_speed")+" mph");
+                    textViewDewPoint.setText(response.getJSONObject("current").getString("dew_point"));
                     JSONArray jsonArrayHourly = response.getJSONArray("hourly");
                     JSONArray jsonArrayDaily = response.getJSONArray("daily");
                     hourlyWeathers.clear();
@@ -354,6 +397,8 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        //dialog.cancel();
+                        onResume();
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -384,4 +429,9 @@ public class MainActivity extends AppCompatActivity {
             manager.removeUpdates(locationListener);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }

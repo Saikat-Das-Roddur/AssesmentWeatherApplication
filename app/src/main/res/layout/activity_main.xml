@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    app:cardBackgroundColor="#A5D6A7"
+    app:cardBackgroundColor="#00695C"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activity.MainActivity">
@@ -173,12 +173,12 @@
                 <androidx.cardview.widget.CardView
                     android:layout_margin="4dp"
                     android:id="@+id/sunriseCard"
-
                     android:layout_weight="1"
-                    app:cardBackgroundColor="#81C784"
+                    app:cardBackgroundColor="#26A69A"
                     android:layout_width="match_parent"
                     android:layout_height="100dp">
                     <LinearLayout
+                        android:background="#00796B"
                         android:orientation="vertical"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
@@ -195,6 +195,7 @@
                             android:id="@+id/sunriseTv"
                             android:layout_weight="1"
                             android:text="6:07Am"
+                            android:textSize="18sp"
                             android:textColor="@color/white"
                             android:layout_gravity="center"
                             android:gravity="center"
@@ -206,7 +207,7 @@
                     android:layout_margin="4dp"
                     android:layout_weight="1"
                     android:id="@+id/sunsetCard"
-                    app:cardBackgroundColor="#81C784"
+                    app:cardBackgroundColor="#00796B"
                     android:layout_width="match_parent"
                     android:layout_height="100dp">
                     <LinearLayout
@@ -225,6 +226,7 @@
                             android:id="@+id/sunsetTv"
                             android:layout_weight="1"
                             android:text="5:09pm"
+                            android:textSize="18sp"
                             android:textColor="@color/white"
                             android:layout_gravity="center"
                             android:gravity="center"
@@ -243,7 +245,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp">
                 <LinearLayout
-                    android:background="@android:color/transparent"
+                    android:background="#00897B"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -256,21 +258,23 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
                         <TextView
-                            android:text="Humidity"
-                            android:textSize="16sp"
-                            android:textColor="#fff"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-                        <TextView
                             android:id="@+id/humidityTv"
                             android:text="59%"
+                            android:textSize="18sp"
                             android:textColor="@color/white"
                             android:layout_gravity="center"
                             android:gravity="center"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"/>
+                        <TextView
+                            android:text="Humidity"
+
+                            android:textColor="#fff"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
                     </LinearLayout>
                     <ImageView
                         android:layout_weight="1"
@@ -287,6 +291,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
                         <TextView
+                            android:id="@+id/uviTv"
+                            android:layout_weight="1"
+                            android:text="6.61"
+                            android:textSize="18sp"
+                            android:textColor="#fff"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                        <TextView
                             android:textColor="#fff"
                             android:text="UV Index"
                             android:textSize="16sp"
@@ -296,60 +310,103 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"/>
 
-                        <TextView
-                            android:id="@+id/uviTv"
-                            android:layout_weight="1"
-                            android:text="6.61"
-                            android:textColor="#fff"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+
                     </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-            <androidx.cardview.widget.CardView
-                android:layout_margin="4dp"
-                android:id="@+id/windCard"
-                app:cardBackgroundColor="#81C784"
-                android:layout_width="match_parent"
-                android:layout_height="100dp">
+
+
+
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-                    <TextView
-                        android:id="@+id/windTv"
+                    android:layout_height="wrap_content">
+                    <androidx.cardview.widget.CardView
                         android:layout_weight="1"
-                        android:text="59%"
-                        android:textSize="18sp"
-                        android:textColor="#fff"
-                        android:layout_gravity="center"
-                        android:gravity="center"
+                        android:layout_margin="4dp"
+                        android:id="@+id/windCard"
+                        app:cardBackgroundColor="#00796B"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-                    <TextView
+                        android:layout_height="100dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:layout_weight="1"
+                                android:src="@drawable/windmill"
+                                android:padding="8dp"
+                                android:layout_gravity="center"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"/>
+                            <LinearLayout
+                                android:layout_weight="1"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                                <TextView
+                                    android:gravity="center"
+                                    android:id="@+id/windTv"
+                                    android:text="59%"
+                                    android:textSize="16sp"
+                                    android:textColor="#fff"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"/>
+                                <TextView
+                                    android:gravity="center"
+                                    android:text="Wind"
+                                    android:textColor="#fff"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                    <androidx.cardview.widget.CardView
                         android:layout_weight="1"
-                        android:text="Wind"
-                        android:textSize="18sp"
-                        android:textColor="#fff"
-                        android:layout_gravity="center"
-                        android:gravity="center"
+                        android:layout_margin="4dp"
+                        android:id="@+id/dewCard"
+                        app:cardBackgroundColor="#00796B"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-                    <ImageView
-                        android:layout_weight="1"
-                        android:src="@drawable/windmill"
-                        android:padding="8dp"
-                        android:layout_gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="100dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:layout_weight="1"
+                                android:src="@drawable/dew_point"
+                                android:padding="8dp"
+                                android:layout_gravity="center"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"/>
 
-
-
+                            <LinearLayout
+                                android:layout_weight="1"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                                <TextView
+                                    android:id="@+id/dewTv"
+                                    android:text="59%"
+                                    android:gravity="center"
+                                    android:textSize="16sp"
+                                    android:textColor="#fff"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"/>
+                                <TextView
+                                    android:gravity="center"
+                                    android:text="Dew Point"
+                                    android:textColor="#fff"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+
             <androidx.cardview.widget.CardView
                 android:id="@+id/sevenDaysCard"
                 android:layout_margin="4dp"

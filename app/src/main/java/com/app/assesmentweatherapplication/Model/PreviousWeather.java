@@ -3,19 +3,97 @@ package com.app.assesmentweatherapplication.Model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 public class PreviousWeather implements Parcelable {
     String date;
     String Image;
     String temperature;
     String description;
+    String sunrise;
+    String sunset;
+    String humidity;
+    String dewPoint;
+    String uvi;
+    String wind;
+    JSONArray hourly;
 
-    public PreviousWeather(String date, String image, String temperature, String description) {
+//    public PreviousWeather(String date, String image, String temperature, String description) {
+//        this.date = date;
+//        Image = image;
+//        this.temperature = temperature;
+//        this.description = description;
+//    }
+
+    public PreviousWeather(String date, String image, String temperature, String description, String sunrise, String sunset, String humidity, String dewPoint, String uvi, String wind, JSONArray hourly) {
         this.date = date;
         Image = image;
         this.temperature = temperature;
         this.description = description;
+        this.sunrise = sunrise;
+        this.sunset = sunset;
+        this.humidity = humidity;
+        this.dewPoint = dewPoint;
+        this.uvi = uvi;
+        this.wind = wind;
+        this.hourly = hourly;
+    }
+
+    public String getWind() {
+        return wind;
+    }
+
+    public void setWind(String wind) {
+        this.wind = wind;
+    }
+
+    public String getSunrise() {
+        return sunrise;
+    }
+
+    public void setSunrise(String sunrise) {
+        this.sunrise = sunrise;
+    }
+
+    public String getSunset() {
+        return sunset;
+    }
+
+    public void setSunset(String sunset) {
+        this.sunset = sunset;
+    }
+
+    public String getHumidity() {
+        return humidity;
+    }
+
+    public void setHumidity(String humidity) {
+        this.humidity = humidity;
+    }
+
+    public String getDewPoint() {
+        return dewPoint;
+    }
+
+    public void setDewPoint(String dewPoint) {
+        this.dewPoint = dewPoint;
+    }
+
+    public String getUvi() {
+        return uvi;
+    }
+
+    public void setUvi(String uvi) {
+        this.uvi = uvi;
+    }
+
+    public JSONArray getHourly() {
+        return hourly;
+    }
+
+    public void setHourly(JSONArray hourly) {
+        this.hourly = hourly;
     }
 
     public String getDate() {
@@ -55,6 +133,17 @@ public class PreviousWeather implements Parcelable {
         Image = in.readString();
         temperature = in.readString();
         description = in.readString();
+        sunrise = in.readString();
+        sunset = in.readString();
+        humidity = in.readString();
+        dewPoint = in.readString();
+        uvi = in.readString();
+        wind = in.readString();
+        try {
+            hourly = in.readByte() == 0x00 ? null : new JSONArray(in.readString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -68,6 +157,18 @@ public class PreviousWeather implements Parcelable {
         dest.writeString(Image);
         dest.writeString(temperature);
         dest.writeString(description);
+        dest.writeString(sunrise);
+        dest.writeString(sunset);
+        dest.writeString(humidity);
+        dest.writeString(dewPoint);
+        dest.writeString(uvi);
+        dest.writeString(wind);
+        if (hourly == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeString(hourly.toString());
+        }
     }
 
     @SuppressWarnings("unused")
@@ -82,15 +183,4 @@ public class PreviousWeather implements Parcelable {
             return new PreviousWeather[size];
         }
     };
-
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        return super.equals(obj);
-    }
 }
